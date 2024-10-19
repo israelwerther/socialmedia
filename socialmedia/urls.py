@@ -17,8 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from socialmedia.accounts.views import CustomLoginView, CustomSignUpView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('login/', CustomLoginView.as_view(), name='login'),
     path('', include('socialmedia.core.urls')),
-    path('api-auth/', include('rest_framework.urls'))
+    path('contas/', include('django.contrib.auth.urls')),
+    path('api-auth/', include('rest_framework.urls')),
+    path('signup/', CustomSignUpView.as_view(), name='signup'),
 ]
