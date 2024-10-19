@@ -1,5 +1,8 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-def index(request):
-    return render(request, 'core/index.html')
+
+class IndexView(LoginRequiredMixin, TemplateView):
+    template_name = 'core/index.html'
+    login_url = '/login/'
+    redirect_field_name = 'redirect_to'
