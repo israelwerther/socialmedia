@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # My Apps
     'socialmedia.core',
     'socialmedia.accounts',
+    'socialmedia.posts',
 
     # API
     'rest_framework',
