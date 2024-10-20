@@ -26,4 +26,5 @@ urlpatterns = [
     path('contas/', include('django.contrib.auth.urls')),
     path('api-auth/', include('rest_framework.urls')),
     path('signup/', SignUpView.as_view(), name='signup'),
+    path('api/v1/', include('socialmedia.core.api_urls')),
 ]
