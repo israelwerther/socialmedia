@@ -19,10 +19,29 @@ class PostViewSet(viewsets.ModelViewSet):
         post = self.get_object()
         user = request.user
 
+        if user in post.dislikes.all():
+            post.dislikes.remove(user)
+
         if user in post.likes.all():
             post.likes.remove(user)
         else:
             post.likes.add(user)
+
+        serializer = self.get_serializer(post)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def dislike(self, request, pk=None):
+        post = self.get_object()
+        user = request.user
+
+        if user in post.likes.all():
+            post.likes.remove(user)
+
+        if user in post.dislikes.all():
+            post.dislikes.remove(user)
+        else:
+            post.dislikes.add(user)
 
         serializer = self.get_serializer(post)
         return Response(serializer.data)
