@@ -1,4 +1,6 @@
 from rest_framework.permissions import IsAuthenticated
+
+from socialmedia.accounts.models import Follow
 from .models import Post
 from .serializers import PostSerializer
 from rest_framework import viewsets
@@ -50,10 +52,10 @@ class PostViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def feed(self, request):
         user = request.user
-        following_users = user.following.all()
+        following_ids = Follow.objects.filter(follower=user).values_list('following_id', flat=True)
         
         posts = Post.objects.filter(
-            Q(user__in=following_users) | Q(user=user)
+            Q(user__id__in=following_ids) | Q(user=user)
         ).order_by('-created_at')
 
         page = self.paginate_queryset(posts)
