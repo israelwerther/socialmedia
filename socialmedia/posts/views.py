@@ -4,6 +4,7 @@ from .serializers import PostSerializer
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.db.models import Q
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -50,7 +51,10 @@ class PostViewSet(viewsets.ModelViewSet):
     def feed(self, request):
         user = request.user
         following_users = user.following.all()
-        posts = Post.objects.filter(user__in=following_users).order_by('-created_at')
+        
+        posts = Post.objects.filter(
+            Q(user__in=following_users) | Q(user=user)
+        ).order_by('-created_at')
 
         page = self.paginate_queryset(posts)
         if page is not None:
