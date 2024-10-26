@@ -70,7 +70,7 @@
     },
     methods: {
       listPosts() {
-        axios.get('{% url "api:posts-list" %}')
+        axios.get('{% url "api:posts-feed" %}')
         .then((response) => {
           this.posts = response.data;
         })
