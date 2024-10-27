@@ -15,11 +15,14 @@
     <div class="card">
       <div class="card-body">
         <h5 class="card-title">Write a new post</h5>
-        <form @submit.prevent="createPost">
+        <form @submit.prevent="createPost" enctype="multipart/form-data">
           {% csrf_token %}
           <input type="hidden" id="csrf-token" value="{{ csrf_token }}" />
           <div class="form-group">
             <textarea v-model="newPostContent" class="form-control mb-3" rows="3" placeholder="Say what are you thinking?!" required></textarea>
+          </div>
+          <div class="form-group">
+            <input type="file" @change="onFileChange" class="form-control" />
           </div>
           <button type="submit" class="btn btn-primary">Publish</button>
         </form>
@@ -29,19 +32,28 @@
     <template>
       <div v-for="post in posts" :key="post.id" class="card mb-1">
         <div class="card-body">
-          <h5 class="card-title">${ post.user === loggedUser ? 'Você' : post.user } - ${ formatTime(post.created_at) }</h5>
+          <h5 class="card-title">
+            ${ post.user === loggedUser ? 'Você' : post.user } - ${ formatTime(post.created_at) }
+          </h5>
           <p v-if="!post.isEditing">${ post.content }</p>
+          <img v-if="post.image" :src="post.image" class="img-thumbnail mb-3" alt="Post Image" style="max-width: 300px;" /> <!-- Exibe a imagem -->
           <textarea v-if="post.isEditing" v-model="post.editContent" class="form-control mb-3" placeholder="Edit your post..."></textarea>
         </div>
         <div class="card-footer d-flex justify-content-end">
-          <button v-if="!post.isEditing" @click="editPost(post)" class="btn btn-sm btn-warning">Edit</button>
-          <button v-if="post.isEditing" @click="updatePost(post)" class="btn btn-sm btn-primary">Save</button>
-          <button @click="likePost(post)" class="btn btn-sm btn-success"><i class="fas fa-thumbs-up"></i> ${ post.like_count }</button>
-          <button class="btn btn-sm btn-outline-danger" @click="dislikePost(post)"><i class="fas fa-thumbs-down"></i><span class="badge badge-light">${ post.dislike_count }</span></button>
-          <button @click="deletePost(post)" class="btn btn-sm btn-danger">Delete</button> <!-- Novo botão -->
+          <button v-if="!post.isEditing" @click="editPost(post)" class="btn btn-sm btn-warning mr-1">Edit</button>
+          <button v-if="post.isEditing" @click="updatePost(post)" class="btn btn-sm btn-primary mr-1">Save</button>
+          <button @click="likePost(post)" class="btn btn-sm btn-success mr-1">
+            <i class="fas fa-thumbs-up"></i> ${ post.like_count }
+          </button>
+          <button class="btn btn-sm btn-outline-danger mr-1" @click="dislikePost(post)">
+            <i class="fas fa-thumbs-down"></i><span class="badge badge-light">${ post.dislike_count }</span>
+          </button>
+          <button @click="deletePost(post)" class="btn btn-sm btn-danger">Delete</button>
         </div>
       </div>
     </template>
+    
+    
   </div>
 
   <div id="app-sidebar" class="col-12 col-md-3">
@@ -78,7 +90,8 @@
       newPostContent: "",
       token: document.querySelector("#csrf-token").value,
       loggedUser: "{{user}}",
-      searchQuery: ""
+      searchQuery: "",
+      newPostImage: null,
     },
     mounted() {
       dayjs.extend(dayjs_plugin_relativeTime);
@@ -88,6 +101,9 @@
       axios.defaults.headers.common["X-CSRFToken"] = this.token;
     },
     methods: {
+      onFileChange(event) {
+        this.newPostImage = event.target.files[0];
+      },
       listPosts() {
         axios
           .get('{% url "api:posts-feed" %}', {
@@ -107,13 +123,22 @@
           alert("Post content cannot be empty.");
           return;
         }
+        const formData = new FormData();
+        formData.append('content', this.newPostContent);
+        if (this.newPostImage) {
+          formData.append('image', this.newPostImage);
+        }
+    
         axios
-          .post('{% url "api:posts-list" %}', {
-            content: this.newPostContent,
+          .post('{% url "api:posts-list" %}', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
           })
           .then((response) => {
             this.posts.unshift({ ...response.data, isEditing: false });
             this.newPostContent = "";
+            this.newPostImage = null;
           })
           .catch((error) => {
             console.error("Error creating post:", error);

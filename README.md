@@ -35,4 +35,5 @@ This project is an API for a simple post management system, built with Django, D
 
    ```bash
    Swagger: http://localhost:8000/api/swagger/
+   Index project: http://localhost:8000/
    

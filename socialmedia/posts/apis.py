@@ -1,13 +1,11 @@
+from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-
-from socialmedia.accounts.models import Follow
+from .permissions import IsPostOwner
 from .models import Post
 from .serializers import PostSerializer
-from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q
-
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('-created_at')
@@ -33,6 +31,11 @@ class PostViewSet(viewsets.ModelViewSet):
             )
 
         return queryset
+
+    def get_permissions(self):
+        if self.request.method in ['PUT', 'PATCH', 'DELETE']:
+            self.permission_classes = [IsAuthenticated, IsPostOwner]
+        return super().get_permissions()
 
     @action(detail=True, methods=['post'])
     def like(self, request, pk=None):
