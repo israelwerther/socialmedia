@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
-from socialmedia.accounts.views import UserViewSet
+from socialmedia.accounts.apis import UserViewSet
 from socialmedia.posts.views import PostViewSet
 
 router = DefaultRouter()

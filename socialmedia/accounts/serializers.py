@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from socialmedia.accounts.forms import UserCreationForm
 from .models import User, Follow
 
 class UserSerializer(serializers.ModelSerializer):
@@ -32,3 +34,30 @@ class UserSerializer(serializers.ModelSerializer):
         ]
         return followers_list
 
+class UserSignupSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True)
+    password_confirmation = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password', 'password_confirmation')
+
+    def validate(self, data):
+        if data['password'] != data['password_confirmation']:
+            raise serializers.ValidationError({"password": "Passwords do not match."})
+        data['password1'] = data['password']
+        data['password2'] = data['password_confirmation']
+        form = UserCreationForm(data=data)
+        if not form.is_valid():
+            raise serializers.ValidationError(form.errors)
+
+        return data
+
+    def create(self, validated_data):
+        validated_data.pop('password_confirmation')
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password']
+        )
+        return user

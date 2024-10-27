@@ -17,6 +17,17 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    def get_queryset(self):
+        user = self.request.user
+        queryset = super().get_queryset()
+
+        if not user.is_superuser:
+            queryset = queryset.filter(
+            Q(user__in=user.following.values('following')) | Q(user=user)
+        ).order_by('-created_at')
+            
+        return queryset
+
     @action(detail=True, methods=['post'])
     def like(self, request, pk=None):
         post = self.get_object()
@@ -50,15 +61,10 @@ class PostViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=['get'])
-    def feed(self, request):
-        user = request.user
-        following_ids = Follow.objects.filter(follower=user).values_list('following_id', flat=True)
-        
-        posts = Post.objects.filter(
-            Q(user__id__in=following_ids) | Q(user=user)
-        ).order_by('-created_at')
-
+    def feed(self, request):        
+        posts = self.get_queryset()
         page = self.paginate_queryset(posts)
+
         if page is not None:
             serializer = PostSerializer(page, many=True)
             return self.get_paginated_response(serializer.data)

@@ -1,7 +1,4 @@
-{% extends "core/base.html" %}
-{% load static %}
-
-{% block content %}
+{% extends "core/base.html" %} {% load static %} {% block content %}
 <!-- Page Heading -->
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
   <h1 class="h3 mb-0 text-gray-800 text-capitalize">Olá, {{user}}!</h1>
@@ -14,7 +11,7 @@
         <h5 class="card-title">Escreva um novo post</h5>
         <form @submit.prevent="createPost">
           {% csrf_token %}
-          <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+          <input type="hidden" id="csrf-token" value="{{ csrf_token }}" />
           <div class="form-group">
             <textarea v-model="newPostContent" class="form-control mb-3" rows="3" placeholder="Fale o que você está pensando?!" required></textarea>
           </div>
@@ -22,7 +19,7 @@
         </form>
       </div>
     </div>
-    <hr>
+    <hr />
     <template>
       <div v-for="post in posts" :key="post.id" class="card mb-1">
         <div class="card-body">
@@ -31,20 +28,14 @@
           <small class="text-muted"></small>
         </div>
         <div class="card-footer d-flex justify-content-end">
-          <button @click="likePost(post)" class="btn btn-sm btn-success">
-            <i class="fas fa-thumbs-up"></i> ${ post.like_count }
-          </button>
-          <button class="btn btn-sm btn-outline-danger" @click="dislikePost(post)">
-            <i class="fas fa-thumbs-down"></i><span class="badge badge-light">${ post.dislike_count }</span>
-          </button>
+          <button @click="likePost(post)" class="btn btn-sm btn-success"><i class="fas fa-thumbs-up"></i> ${ post.like_count }</button>
+          <button class="btn btn-sm btn-outline-danger" @click="dislikePost(post)"><i class="fas fa-thumbs-down"></i><span class="badge badge-light">${ post.dislike_count }</span></button>
         </div>
       </div>
     </template>
   </div>
 </div>
-{% endblock content %}
-
-{% block js %}
+{% endblock content %} {% block js %}
 
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -58,66 +49,70 @@
     el: "#app",
     data: {
       posts: [],
-      newPostContent: '',
-      token: document.querySelector('#csrf-token').value,
-      loggedUser: '{{user}}'
+      newPostContent: "",
+      token: document.querySelector("#csrf-token").value,
+      loggedUser: "{{user}}",
     },
     mounted() {
       dayjs.extend(dayjs_plugin_relativeTime);
-      dayjs.locale('pt-br');
+      dayjs.locale("pt-br");
       this.listPosts();
-      axios.defaults.headers.common['X-CSRFToken'] = this.token;
+      axios.defaults.headers.common["X-CSRFToken"] = this.token;
     },
     methods: {
       listPosts() {
-        axios.get('{% url "api:posts-feed" %}')
-        .then((response) => {
-          this.posts = response.data.results;
-        })
-        .catch((error) => {
-          console.error("Error loading posts:", error);
-        });
+        axios
+          .get('{% url "api:posts-feed" %}')
+          .then((response) => {
+            this.posts = response.data.results;
+          })
+          .catch((error) => {
+            console.error("Error loading posts:", error);
+          });
       },
       createPost() {
-        if (this.newPostContent.trim() === '') {
-          alert('Post content cannot be empty.');
+        if (this.newPostContent.trim() === "") {
+          alert("Post content cannot be empty.");
           return;
         }
-        axios.post('{% url "api:posts-list" %}', {
-          content: this.newPostContent
-        })
-        .then((response) => {
-          this.posts.unshift(response.data);
-          this.newPostContent = '';
-        })
-        .catch((error) => {
-          console.error("Error creating post:", error);
-        });
+        axios
+          .post('{% url "api:posts-list" %}', {
+            content: this.newPostContent,
+          })
+          .then((response) => {
+            this.posts.unshift(response.data);
+            this.newPostContent = "";
+          })
+          .catch((error) => {
+            console.error("Error creating post:", error);
+          });
       },
 
       formatTime(createdAt) {
         return dayjs(createdAt).fromNow();
       },
       likePost(post) {
-        axios.post(post.urls.like)
+        axios
+          .post(post.urls.like)
           .then((response) => {
             post.like_count = response.data.like_count;
-            this.listPosts()
+            this.listPosts();
           })
           .catch((error) => {
-            console.error('Error when liking the post:', error);
+            console.error("Error when liking the post:", error);
           });
       },
       dislikePost(post) {
-        axios.post(post.urls.dislike)
+        axios
+          .post(post.urls.dislike)
           .then((response) => {
             post.like_count = response.data.like_count;
             post.dislike_count = response.data.dislike_count;
           })
           .catch((error) => {
-            console.error('Error when disliking the post:', error);
+            console.error("Error when disliking the post:", error);
           });
-      }
+      },
     },
   });
 </script>
