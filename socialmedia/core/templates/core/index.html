@@ -6,6 +6,9 @@
 
 <div class="row">
   <div id="app" class="col-12 col-md-9">
+    <div class="form-group mb-3">
+      <input type="text" v-model="searchQuery" class="form-control" placeholder="Search posts by keywords or hashtags..." @input="listPosts" />
+    </div>
     <div class="card">
       <div class="card-body">
         <h5 class="card-title">Write a new post</h5>
@@ -79,7 +82,11 @@
     methods: {
       listPosts() {
         axios
-          .get('{% url "api:posts-feed" %}')
+          .get('{% url "api:posts-feed" %}', {
+            params: {
+              search: this.searchQuery
+            }
+          })
           .then((response) => {
             this.posts = response.data.results;
           })

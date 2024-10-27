@@ -23,9 +23,15 @@ class PostViewSet(viewsets.ModelViewSet):
 
         if not user.is_superuser:
             queryset = queryset.filter(
-            Q(user__in=user.following.values('following')) | Q(user=user)
-        ).order_by('-created_at')
-            
+                Q(user__in=user.following.values('following')) | Q(user=user)
+            ).order_by('-created_at')
+        
+        search_query = self.request.query_params.get('search', None)
+        if search_query:
+            queryset = queryset.filter(
+                Q(content__icontains=search_query)
+            )
+
         return queryset
 
     @action(detail=True, methods=['post'])
