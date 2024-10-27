@@ -1,13 +1,10 @@
-{% extends "core/base.html" %}
-{% load static %}
-
-{% block css %}
+{% extends "core/base.html" %} {% load static %} {% block css %}
 <style>
   .btn-secondary {
     position: relative;
     overflow: hidden; /* para que não apareça o conteúdo fora do botão */
   }
-  
+
   .btn-secondary input[type="file"] {
     position: absolute;
     top: 0;
@@ -18,10 +15,7 @@
     cursor: pointer; /* muda o cursor para indicar que é clicável */
   }
 </style>
-{% endblock css %}
-
-
-{% block content %}
+{% endblock css %} {% block content %}
 <!-- Page Heading -->
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
   <h1 class="h3 mb-0 text-gray-800 text-capitalize">Olá, {{user}}!</h1>
@@ -51,53 +45,40 @@
         </form>
       </div>
     </div>
-    
+
     <hr />
     <template>
       <div v-for="post in posts" :key="post.id" class="card mb-1">
         <div class="card-body">
-          <h5 class="card-title">
-            ${ post.user === loggedUser ? 'Você' : post.user } - ${ formatTime(post.created_at) }
-          </h5>
+          <h5 class="card-title">${ post.user === loggedUser ? 'Você' : post.user } - ${ formatTime(post.created_at) }</h5>
           <p v-if="!post.isEditing">${ post.content }</p>
-          <img v-if="post.image" :src="post.image" class="img-thumbnail mb-3" alt="Post Image" style="max-width: 300px;" /> <!-- Exibe a imagem -->
+          <img v-if="post.image" :src="post.image" class="img-thumbnail mb-3" alt="Post Image" style="max-width: 300px" />
+          <!-- Exibe a imagem -->
           <textarea v-if="post.isEditing" v-model="post.editContent" class="form-control mb-3" placeholder="Edit your post..."></textarea>
         </div>
         <div class="card-footer d-flex justify-content-end">
           <button v-if="!post.isEditing" @click="editPost(post)" class="btn btn-sm btn-warning mr-1">Edit</button>
           <button v-if="post.isEditing" @click="updatePost(post)" class="btn btn-sm btn-primary mr-1">Save</button>
-          <button @click="likePost(post)" class="btn btn-sm btn-success mr-1">
-            <i class="fas fa-thumbs-up"></i> ${ post.like_count }
-          </button>
-          <button class="btn btn-sm btn-outline-danger mr-1" @click="dislikePost(post)">
-            <i class="fas fa-thumbs-down"></i><span class="badge badge-light">${ post.dislike_count }</span>
-          </button>
+          <button @click="likePost(post)" class="btn btn-sm btn-success mr-1"><i class="fas fa-thumbs-up"></i> ${ post.like_count }</button>
+          <button class="btn btn-sm btn-outline-danger mr-1" @click="dislikePost(post)"><i class="fas fa-thumbs-down"></i><span class="badge badge-light">${ post.dislike_count }</span></button>
           <button @click="deletePost(post)" class="btn btn-sm btn-danger">Delete</button>
         </div>
       </div>
     </template>
-    
-    
   </div>
 
   <div id="app-sidebar" class="col-12 col-md-3">
     <div v-for="user in users" :key="user.id" class="card mb-2">
       <div class="card-body">
         <h5 class="card-title">${ user.username }</h5>
-        <button v-if="user.is_following" @click="unfollowUser(user)" class="btn btn-sm btn-danger">
-          Unfollow ${ user.username }
-        </button>
-        <button v-else @click="followUser(user)" class="btn btn-sm btn-primary">
-          Follow ${ user.username }
-        </button>
+        <button v-if="user.is_following" @click="unfollowUser(user)" class="btn btn-sm btn-danger">Unfollow ${ user.username }</button>
+        <button v-else @click="followUser(user)" class="btn btn-sm btn-primary">Follow ${ user.username }</button>
       </div>
     </div>
   </div>
 </div>
 
-{% endblock content %}
-
-{% block js %}
+{% endblock content %} {% block js %}
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
@@ -132,11 +113,11 @@
         axios
           .get('{% url "api:posts-feed" %}', {
             params: {
-              search: this.searchQuery
-            }
+              search: this.searchQuery,
+            },
           })
           .then((response) => {
-            this.posts = response.data.results.map(post => ({ ...post, isEditing: false }));
+            this.posts = response.data.results.map((post) => ({ ...post, isEditing: false }));
           })
           .catch((error) => {
             console.error("Error loading posts:", error);
@@ -148,16 +129,16 @@
           return;
         }
         const formData = new FormData();
-        formData.append('content', this.newPostContent);
+        formData.append("content", this.newPostContent);
         if (this.newPostImage) {
-          formData.append('image', this.newPostImage);
+          formData.append("image", this.newPostImage);
         }
-    
+
         axios
           .post('{% url "api:posts-list" %}', formData, {
             headers: {
-              'Content-Type': 'multipart/form-data'
-            }
+              "Content-Type": "multipart/form-data",
+            },
           })
           .then((response) => {
             this.posts.unshift({ ...response.data, isEditing: false });
@@ -194,23 +175,38 @@
           });
       },
       listUsers() {
-        axios.get('{% url "api:users-list" %}')
-          .then(response => { this.users = response.data.results; })
-          .catch(error => { console.error("Error loading users:", error); });
+        axios
+          .get('{% url "api:users-list" %}')
+          .then((response) => {
+            this.users = response.data.results;
+          })
+          .catch((error) => {
+            console.error("Error loading users:", error);
+          });
       },
       followUser(user) {
-        axios.post(`/api/users/${user.id}/follow/`)
-          .then(() => { user.is_following = true; })
-          .catch(error => { console.error("Error following user:", error); });
+        axios
+          .post(`/api/users/${user.id}/follow/`)
+          .then(() => {
+            user.is_following = true;
+          })
+          .catch((error) => {
+            console.error("Error following user:", error);
+          });
       },
       unfollowUser(user) {
-        axios.post(`/api/users/${user.id}/unfollow/`)
-          .then(() => { user.is_following = false; })
-          .catch(error => { console.error("Error when unfollowing user:", error); });
+        axios
+          .post(`/api/users/${user.id}/unfollow/`)
+          .then(() => {
+            user.is_following = false;
+          })
+          .catch((error) => {
+            console.error("Error when unfollowing user:", error);
+          });
       },
       editPost(post) {
         post.isEditing = true;
-        post.editContent = post.content; 
+        post.editContent = post.content;
       },
       updatePost(post) {
         if (post.editContent.trim() === "") {
@@ -235,7 +231,7 @@
           axios
             .delete(`/api/posts/${post.id}/`)
             .then(() => {
-              this.posts = this.posts.filter(p => p.id !== post.id);
+              this.posts = this.posts.filter((p) => p.id !== post.id);
             })
             .catch((error) => {
               console.error("Error deleting post:", error);
