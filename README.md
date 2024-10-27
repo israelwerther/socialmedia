@@ -13,7 +13,7 @@ This project is an API for a simple post management system, built with Django, D
    ```bash
    # Download the repository
 
-   https://github.com/israelwerther/socialmedia.git
+   https://github.com/israelwerther/socialmedia
    
 
    # Create and activate the virtual environment
