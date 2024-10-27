@@ -1,6 +1,26 @@
 {% extends "core/base.html" %}
 {% load static %}
 
+{% block css %}
+<style>
+  .btn-secondary {
+    position: relative;
+    overflow: hidden; /* para que não apareça o conteúdo fora do botão */
+  }
+  
+  .btn-secondary input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    opacity: 0; /* torna invisível o botão */
+    cursor: pointer; /* muda o cursor para indicar que é clicável */
+  }
+</style>
+{% endblock css %}
+
+
 {% block content %}
 <!-- Page Heading -->
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -22,12 +42,16 @@
             <textarea v-model="newPostContent" class="form-control mb-3" rows="3" placeholder="Say what are you thinking?!" required></textarea>
           </div>
           <div class="form-group">
-            <input type="file" @change="onFileChange" class="form-control" />
+            <label class="btn btn-secondary">
+              <input type="file" @change="onFileChange" class="d-none" />
+              Select an image
+            </label>
           </div>
           <button type="submit" class="btn btn-primary">Publish</button>
         </form>
       </div>
     </div>
+    
     <hr />
     <template>
       <div v-for="post in posts" :key="post.id" class="card mb-1">
