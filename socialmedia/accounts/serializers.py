@@ -1,5 +1,4 @@
 from rest_framework import serializers
-
 from socialmedia.accounts.forms import UserCreationForm
 from .models import User, Follow
 
@@ -7,10 +6,11 @@ class UserSerializer(serializers.ModelSerializer):
     urls = serializers.JSONField(read_only=True)
     following = serializers.SerializerMethodField()
     followers = serializers.SerializerMethodField()
+    is_following = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'following', 'followers', 'urls']
+        fields = ['id', 'username', 'following', 'followers', 'urls', 'is_following']
 
     def get_following(self, obj):
         following_users = Follow.objects.filter(follower=obj).select_related('following')
@@ -33,6 +33,12 @@ class UserSerializer(serializers.ModelSerializer):
             for follow in followers_users
         ]
         return followers_list
+
+    def get_is_following(self, obj):
+        request = self.context.get('request')
+        if request.user.is_authenticated:
+            return Follow.objects.filter(follower=request.user, following=obj).exists()
+        return False
 
 class UserSignupSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)

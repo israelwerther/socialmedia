@@ -22,9 +22,10 @@ class UserViewSet(viewsets.ModelViewSet):
         queryset = super().get_queryset()
 
         if not user.is_superuser:
-            queryset = queryset.filter(pk=user.pk)
+            queryset = queryset.exclude(pk=user.pk)
 
         return queryset
+
 
     @action(detail=True, methods=['post'])
     def follow(self, request, pk=None):

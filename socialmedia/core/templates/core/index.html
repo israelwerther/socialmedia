@@ -5,17 +5,17 @@
 </div>
 
 <div class="row">
-  <div id="app" class="col-12">
+  <div id="app" class="col-12 col-md-9">
     <div class="card">
       <div class="card-body">
-        <h5 class="card-title">Escreva um novo post</h5>
+        <h5 class="card-title">Write a new post</h5>
         <form @submit.prevent="createPost">
           {% csrf_token %}
           <input type="hidden" id="csrf-token" value="{{ csrf_token }}" />
           <div class="form-group">
-            <textarea v-model="newPostContent" class="form-control mb-3" rows="3" placeholder="Fale o que você está pensando?!" required></textarea>
+            <textarea v-model="newPostContent" class="form-control mb-3" rows="3" placeholder="Say what are you thinking?!" required></textarea>
           </div>
-          <button type="submit" class="btn btn-primary">Postar</button>
+          <button type="submit" class="btn btn-primary">Publish</button>
         </form>
       </div>
     </div>
@@ -34,7 +34,22 @@
       </div>
     </template>
   </div>
+
+  <div id="app" class="col-12 col-md-3">
+    <div v-for="user in users" :key="user.id" class="card mb-2">
+      <div class="card-body">
+        <h5 class="card-title">${ user.username }</h5>
+        <button v-if="user.is_following" @click="unfollowUser(user)" class="btn btn-sm btn-danger">
+          Unfollow ${ user.username }
+        </button>
+        <button v-else @click="followUser(user)" class="btn btn-sm btn-primary">
+          Follow ${ user.username }
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
+
 {% endblock content %} {% block js %}
 
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
@@ -49,14 +64,16 @@
     el: "#app",
     data: {
       posts: [],
+      users: [],
       newPostContent: "",
       token: document.querySelector("#csrf-token").value,
       loggedUser: "{{user}}",
     },
     mounted() {
       dayjs.extend(dayjs_plugin_relativeTime);
-      dayjs.locale("pt-br");
+      dayjs.locale("en");
       this.listPosts();
+      this.listUsers();
       axios.defaults.headers.common["X-CSRFToken"] = this.token;
     },
     methods: {
@@ -113,6 +130,21 @@
             console.error("Error when disliking the post:", error);
           });
       },
+      listUsers() {
+        axios.get('{% url "api:users-list" %}')
+          .then(response => { this.users = response.data.results; })
+          .catch(error => { console.error("Error loading users:", error); });
+      },
+      followUser(user) {
+        axios.post(`/api/users/${user.id}/follow/`)
+          .then(() => { user.is_following = true; })
+          .catch(error => { console.error("Error following user:", error); });
+      },
+      unfollowUser(user) {
+        axios.post(`/api/users/${user.id}/unfollow/`)
+          .then(() => { user.is_following = false; })
+          .catch(error => { console.error("Error when unfollowing user:", error); });
+      }
     },
   });
 </script>
