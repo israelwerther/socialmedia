@@ -72,7 +72,7 @@
       listPosts() {
         axios.get('{% url "api:posts-feed" %}')
         .then((response) => {
-          this.posts = response.data;
+          this.posts = response.data.results;
         })
         .catch((error) => {
           console.error("Error loading posts:", error);
@@ -83,7 +83,6 @@
           alert('Post content cannot be empty.');
           return;
         }
-
         axios.post('{% url "api:posts-list" %}', {
           content: this.newPostContent
         })
