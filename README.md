@@ -12,8 +12,9 @@ This project is an API for a simple post management system, built with Django, D
 
    ```bash
    # Download the repository
+
    https://github.com/israelwerther/socialmedia.git
-   cd socialmedia
+   
 
    # Create and activate the virtual environment
    virtualenv venv
@@ -24,6 +25,10 @@ This project is an API for a simple post management system, built with Django, D
 
    # Apply database migrations
    python manage.py migrate
+
+
+   With a postgres database created, point your .env file to an existing database
+   For example: DATABASE_URL=postgres://postgres:postgres@localhost:5432/socialmediadb
    
 
 1. **Access the documentation**   
